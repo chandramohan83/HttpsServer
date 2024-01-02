@@ -47,7 +47,28 @@ void handleConnection(std::shared_ptr<ssl::stream<ip::tcp::socket>> clientSocket
     }
 }
 
-int main() {
+int main(int argc, char* argv[])
+{
+    if (argc != 2) {
+        std::cerr << "Usage: " << argv[0] << " <port_number>" << std::endl;
+        return 1;
+    }
+    try {
+	    // Convert the port number argument from string to integer
+	    int port = std::stoi(argv[1]);
+
+	    // Validate the port number range (1 to 65535)
+	    if (port < 1 || port > 65535) {
+		    std::cerr << "Error: Port number must be between 1 and 65535." << std::endl;
+		    return 1;
+	    }
+
+	    // Output the received port number
+	    std::cout << "Using port number: " << port << std::endl;
+
+	    // You can now use the port number for your application logic
+	    // For example, bind a server socket to this port
+
     io_context ioContext;
     ssl::context context(ssl::context::sslv23);
     boost::system::error_code ec;
@@ -81,7 +102,7 @@ int main() {
                                        "TLS_AES_256_GCM_SHA384:"
                                        "TLS_CHACHA20_POLY1305_SHA256";
     SSL_CTX_set_cipher_list(context.native_handle(), sslCiphers);
-    ip::tcp::acceptor acceptor(ioContext, ip::tcp::endpoint(ip::tcp::v4(), 5555));
+    ip::tcp::acceptor acceptor(ioContext, ip::tcp::endpoint(ip::tcp::v4(), port));
 
     while (true) {
         std::shared_ptr<ssl::stream<ip::tcp::socket>> clientSocket = std::make_shared<ssl::stream<ip::tcp::socket>>(ioContext, context);
@@ -91,5 +112,12 @@ int main() {
         std::thread(handleConnection, clientSocket).detach();
     }
 
+    } catch (const std::invalid_argument& e) {
+	    std::cerr << "Error: Invalid port number. Please provide a valid integer." << std::endl;
+	    return 1;
+    } catch (const std::out_of_range& e) {
+	    std::cerr << "Error: Port number out of range." << std::endl;
+	    return 1;
+    }
     return 0;
 }
