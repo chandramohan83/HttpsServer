@@ -12,4 +12,4 @@ build-essential g++ python3-dev autotools-dev libicu-dev libbz2-dev libboost-all
 
 Used above command to compile the code
 
-# Run ./https_server <port number> command to run https server
+# Run "./https_server <port number>" command to run https server
